@@ -4,7 +4,7 @@
     possible. It makes this information available via function APIs.
     If called from the command line, it prints the platform
     information concatenated as single string to stdout. The output
-    format is useable as part of a filename.
+    format is usable as part of a filename.
 """
 
 __version__ = '1.0.8'
@@ -344,47 +344,6 @@ def mac_ver(release='', versioninfo=('', '', ''), machine=''):
     return release, versioninfo, machine
 
 
-def _java_getprop(name, default):
-    from java.lang import System
-    try:
-        value = System.getProperty(name)
-        if value is None:
-            return default
-        return value
-    except AttributeError:
-        return default
-
-
-def java_ver(release='', vendor='', vminfo=('', '', ''), osinfo=('', '', '')):
-    """ Version interface for Jython.
-        Returns a tuple (release, vendor, vminfo, osinfo) with vminfo being
-        a tuple (vm_name, vm_release, vm_vendor) and osinfo being a
-        tuple (os_name, os_version, os_arch).
-        Values which cannot be determined are set to the defaults
-        given as parameters (which all default to '').
-    """
-    # Import the needed APIs
-    try:
-        import java.lang
-    except ImportError:
-        return release, vendor, vminfo, osinfo
-
-    vendor = _java_getprop('java.vendor', vendor)
-    release = _java_getprop('java.version', release)
-    vm_name, vm_release, vm_vendor = vminfo
-    vm_name = _java_getprop('java.vm.name', vm_name)
-    vm_vendor = _java_getprop('java.vm.vendor', vm_vendor)
-    vm_release = _java_getprop('java.vm.version', vm_release)
-    vminfo = vm_name, vm_release, vm_vendor
-    os_name, os_version, os_arch = osinfo
-    os_arch = _java_getprop('java.os.arch', os_arch)
-    os_name = _java_getprop('java.os.name', os_name)
-    os_version = _java_getprop('java.os.version', os_version)
-    osinfo = os_name, os_version, os_arch
-
-    return release, vendor, vminfo, osinfo
-
-
 ### System name aliasing
 
 def system_alias(system, release, version):
@@ -628,10 +587,10 @@ class _Processor:
         func = getattr(cls, f'get_{sys.platform}', cls.from_subprocess)
         return func() or ''
 
-    def get_win32():
+    def get_win32(self):
         return os.environ.get('PROCESSOR_IDENTIFIER', _get_machine_win32())
 
-    def get_OpenVMS():
+    def get_OpenVMS(self):
         try:
             import vms_lib
         except ImportError:
@@ -640,7 +599,7 @@ class _Processor:
             csid, cpu_number = vms_lib.getsyi('SYI$_CPU', 0)
             return 'Alpha' if cpu_number >= 128 else 'VAX'
 
-    def from_subprocess():
+    def from_subprocess(self):
         """
         Fall back to `uname -p`
         """
@@ -750,13 +709,6 @@ def uname():
                 else:
                     version = '16bit'
             system = 'Windows'
-
-        elif system[:4] == 'java':
-            release, vendor, vminfo, osinfo = java_ver()
-            system = 'Java'
-            version = ', '.join(vminfo)
-            if not version:
-                version = vendor
 
     # System specific extensions
     if system == 'OpenVMS':
@@ -1070,15 +1022,6 @@ def platform(aliased=0, terse=0):
         platform = _platform(system, release, machine, processor,
                              'with',
                              libcname + libcversion)
-    elif system == 'Java':
-        # Java platforms
-        r, v, vminfo, (os_name, os_version, os_arch) = java_ver()
-        if terse or not os_name:
-            platform = _platform(system, release, version)
-        else:
-            platform = _platform(system, release, version,
-                                 'on',
-                                 os_name, os_version, os_arch)
 
     else:
         # Generic handler

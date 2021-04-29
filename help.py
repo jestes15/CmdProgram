@@ -9,14 +9,6 @@ print_help_msg = 'The print command echos back any user input after "print"\n' \
 print_CpuInfo_msg = 'Shows the amount of CPU cores in the system\n' \
                     'This command does not take any arguments.'
 
-print_os_msg = 'Returns the OS version\n' \
-               'Flags:\n' \
-               '========\n' \
-               '-l   Returns the longer OS version with OS version\n' \
-               '-s   Returns name of OS\n' \
-               '========\n' \
-               'To be deprecated soon'
-
 print_GpuInfo_msg = 'Returns information about system GPU, VRAM usage, VRAM total, uuid, Temperature ' \
                     'and the load on the GPU\n' \
                     'Command has no flags'
@@ -41,7 +33,6 @@ print_BootInfo_msg = 'Returns last boot time and date\n'
 help_dic = {
     'print': print_help_msg,
     'CpuInfo': print_CpuInfo_msg,
-    'os': print_os_msg,
     'GpuInfo': print_GpuInfo_msg,
     'OsInfo': print_OsInfo_msg,
     'MemInfo': print_MemInfo_msg,
